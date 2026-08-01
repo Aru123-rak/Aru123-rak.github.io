@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --color-bg-primary: #020617;
-  --color-text-primary: #ffffff;
-  --color-text-muted: #00e5ff;
-  --color-accent-cyan: #00e5ff;
-  --color-hairline: rgba(255, 255, 255, 0.1);
-  --color-glass: rgba(0, 0, 0, 0.5);
+  --background: #f8fafc; /* Lighter background for higher contrast manga feel */
+  --foreground: #020617;
+  --color-bg-primary: #ffffff;
+  --color-text-primary: #020617;
+  --color-text-muted: #334155;
+  --color-accent-cyan: #ff007f; /* Anime Magenta */
+  --color-hairline: #020617; /* Hard black lines instead of translucent */
+  --color-glass: rgba(255, 255, 255, 0.9);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
-  --font-mono: var(--font-jetbrains-mono);
-  --font-heading: var(--font-space-grotesk);
+  --font-sans: var(--font-heading);
+  --font-mono: var(--font-heading);
+  --font-heading: var(--font-heading);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #020617;
-    --foreground: #f8fafc;
+    /* Hardcode light theme here too to prevent OS override, since the video is light */
+    --background: #f8fafc;
+    --foreground: #020617;
   }
 }
 
@@ -30,32 +31,49 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
 p {
   color: var(--color-text-muted);
   line-height: 1.6;
   text-shadow: 
-    -1px -1px 0 rgba(0,0,0,1),  
-     1px -1px 0 rgba(0,0,0,1),
-    -1px  1px 0 rgba(0,0,0,1),
-     1px  1px 0 rgba(0,0,0,1),
-     0px 2px 4px rgba(0,0,0,0.8);
+    -2px -2px 0 #ffffff,  
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff,
+     0 0 8px #ffffff;
+}
+
+/* Manga-style hard offset shadow */
+.shadow-manga {
+  box-shadow: 4px 4px 0px #020617;
+}
+
+.shadow-manga-hover:hover {
+  box-shadow: 6px 6px 0px var(--color-accent-cyan);
+  transform: translate(-2px, -2px);
+}
+
+.shadow-manga-active:active {
+  box-shadow: 0px 0px 0px #020617;
+  transform: translate(4px, 4px);
 }
 
 .outline-white {
   text-shadow: 
-    -1px -1px 0 rgba(255,255,255,0.8),  
-     1px -1px 0 rgba(255,255,255,0.8),
-    -1px  1px 0 rgba(255,255,255,0.8),
-     1px  1px 0 rgba(255,255,255,0.8);
+    -2px -2px 0 #ffffff,  
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff,
+     0px 4px 0px rgba(0,0,0,0.1);
 }
 
 .outline-black {
+  /* In light mode, outline-black acts as a white halo around dark text */
   text-shadow: 
-    -1px -1px 0 rgba(0,0,0,1),  
-     1px -1px 0 rgba(0,0,0,1),
-    -1px  1px 0 rgba(0,0,0,1),
-     1px  1px 0 rgba(0,0,0,1),
-     0px 2px 4px rgba(0,0,0,0.8);
+    -2px -2px 0 #ffffff,  
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff;
 }

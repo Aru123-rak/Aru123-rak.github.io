@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
 
 const FRAME_COUNT = 240;
 const START_FRAME = 1;
@@ -12,7 +12,12 @@ function padLeft(num: number, size: number) {
   return s;
 }
 
-export default function CanvasSequence() {
+interface CanvasSequenceProps {
+  onProgress?: (progress: number) => void;
+  onComplete?: () => void;
+}
+
+export default function CanvasSequence({ onProgress, onComplete }: CanvasSequenceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -21,6 +26,7 @@ export default function CanvasSequence() {
   
   // Playback forwards: start at START_FRAME and go up to FRAME_COUNT
   const frameIndex = useTransform(scrollYProgress, [0, 1], [START_FRAME, FRAME_COUNT]);
+  const gearRotation = useTransform(scrollYProgress, [0, 1], [0, 1080]); // 3 full rotations
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -37,32 +43,46 @@ export default function CanvasSequence() {
     firstImg.src = `/frames/ezgif-frame-${padLeft(START_FRAME, 3)}.jpg`;
     imagesRef.current[START_FRAME] = firstImg;
 
-    // 2. Load the rest sequentially in the background so it doesn't freeze the browser
+    // 2. Load the rest sequentially in the background
     let currentFrameToLoad = START_FRAME + 1;
+    let loadedCount = 1; // Since we immediately loaded the first frame
+    
+    if (onProgress) onProgress((loadedCount / FRAME_COUNT) * 100);
     
     const loadNextBatch = () => {
-      // Load 10 frames at a time to be gentle on the network
+      // Load 10 frames at a time
+      let batchCount = 0;
       for (let i = 0; i < 10 && currentFrameToLoad <= FRAME_COUNT; i++) {
         const img = new Image();
-        // Set decoding to async to prevent main thread blocking
         img.decoding = 'async';
+        
+        img.onload = () => {
+          loadedCount++;
+          if (onProgress) {
+            onProgress(Math.round((loadedCount / FRAME_COUNT) * 100));
+          }
+          if (loadedCount === FRAME_COUNT && onComplete) {
+            onComplete();
+          }
+        };
+        
         img.src = `/frames/ezgif-frame-${padLeft(currentFrameToLoad, 3)}.jpg`;
         imagesRef.current[currentFrameToLoad] = img;
         currentFrameToLoad++;
+        batchCount++;
       }
       
       if (currentFrameToLoad <= FRAME_COUNT) {
-        // Schedule next batch when the browser has idle time
         if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
           (window as any).requestIdleCallback(loadNextBatch);
         } else {
-          setTimeout(loadNextBatch, 50);
+          setTimeout(loadNextBatch, 20);
         }
       }
     };
     
-    // Start background loading after a tiny delay so the rest of the page can finish rendering
-    setTimeout(loadNextBatch, 500);
+    // Start background loading immediately
+    loadNextBatch();
     
   }, []);
 
@@ -145,23 +165,24 @@ export default function CanvasSequence() {
         
         {/* Blueprint gear precisely glued to the video frame */}
         <div 
-          className="absolute z-[60] pointer-events-none drop-shadow-[0_0_12px_rgba(0,229,255,0.6)]"
-          style={{ bottom: '12.5%', right: '7%' }}
+          className="absolute z-[60] pointer-events-none drop-shadow-[0_0_12px_rgba(2,132,199,0.4)]"
+          style={{ bottom: '13%', right: '7%' }}
         >
-          <svg 
+          <motion.svg 
             viewBox="0 0 100 100" 
             width="56" 
             height="56" 
-            className="text-[var(--color-accent-cyan)] animate-[spin_8s_linear_infinite] opacity-90"
+            className="text-[var(--color-accent-cyan)] opacity-100"
+            style={{ rotate: gearRotation }}
           >
             <path 
               fill="currentColor" 
-              stroke="black" 
-              strokeWidth="3" 
+              stroke="#020617" 
+              strokeWidth="4" 
               fillRule="evenodd"
               d="M 95.0 50.0 L 94.0 59.4 L 83.8 59.1 L 81.2 65.9 L 89.0 72.5 L 83.4 80.1 L 74.7 74.7 L 69.1 79.4 L 72.5 89.0 L 63.9 92.8 L 59.1 83.8 L 51.8 85.0 L 50.0 95.0 L 40.6 94.0 L 40.9 83.8 L 34.1 81.2 L 27.5 89.0 L 19.9 83.4 L 25.3 74.7 L 20.6 69.1 L 11.0 72.5 L 7.2 63.9 L 16.2 59.1 L 15.0 51.8 L 5.0 50.0 L 6.0 40.6 L 16.2 40.9 L 18.8 34.1 L 11.0 27.5 L 16.6 19.9 L 25.3 25.3 L 30.9 20.6 L 27.5 11.0 L 36.1 7.2 L 40.9 16.2 L 48.2 15.0 L 50.0 5.0 L 59.4 6.0 L 59.1 16.2 L 65.9 18.8 L 72.5 11.0 L 80.1 16.6 L 74.7 25.3 L 79.4 30.9 L 89.0 27.5 L 92.8 36.1 L 83.8 40.9 L 85.0 48.2 Z M 65 50 A 15 15 0 1 0 35 50 A 15 15 0 1 0 65 50 Z" 
             />
-          </svg>
+          </motion.svg>
         </div>
       </div>
     </div>

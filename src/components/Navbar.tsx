@@ -26,7 +26,7 @@ export default function Navbar() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-colors duration-500",
         isScrolled
-          ? "bg-[var(--color-bg-primary)]/90 backdrop-blur-lg border-b border-[var(--color-hairline)] shadow-md" 
+          ? "bg-[var(--color-bg-primary)]/90 backdrop-blur-lg border-b-4 border-[#020617] shadow-manga" 
           : "bg-transparent"
       )}
     >
@@ -69,10 +69,10 @@ export default function Navbar() {
           <Link
             href="#contact"
             className={cn(
-              "hidden md:flex relative px-5 py-2 rounded-sm overflow-hidden text-sm font-bold border-2 transition-colors border-[var(--color-hairline)] text-[var(--color-text-primary)] hover:border-[var(--color-accent-cyan)] hover:text-[var(--color-accent-cyan)]"
+              "hidden md:flex relative px-5 py-2 overflow-hidden text-sm font-bold border-2 transition-all border-[#020617] bg-[var(--color-bg-primary)] text-[#020617] hover:bg-[var(--color-accent-cyan)] shadow-manga shadow-manga-hover shadow-manga-active -skew-x-12"
             )}
           >
-            <span className="relative flex items-center gap-2 transition-colors">
+            <span className="relative flex items-center gap-2 transition-colors skew-x-12">
               Get in Touch
             </span>
           </Link>
@@ -96,7 +96,7 @@ export default function Navbar() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden absolute top-16 left-0 right-0 bg-[var(--color-bg-primary)]/95 backdrop-blur-lg border-b border-[var(--color-hairline)] shadow-lg flex flex-col px-6 py-4 gap-6 font-mono font-bold text-sm tracking-widest uppercase text-[var(--color-text-primary)]"
+          className="md:hidden absolute top-16 left-0 right-0 bg-[var(--color-bg-primary)]/95 backdrop-blur-lg border-b-4 border-[#020617] shadow-manga flex flex-col px-6 py-4 gap-6 font-mono font-bold text-sm tracking-widest uppercase text-[var(--color-text-primary)]"
         >
           {["About", "Skills", "Projects", "Experience", "Contact"].map((item) => (
             <Link
