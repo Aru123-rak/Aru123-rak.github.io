@@ -32,11 +32,38 @@ export default function CanvasSequence() {
 
   // Preload images
   useEffect(() => {
-    for (let i = START_FRAME; i <= FRAME_COUNT; i++) {
-      const img = new Image();
-      img.src = `/frames/ezgif-frame-${padLeft(i, 3)}.jpg`;
-      imagesRef.current[i] = img;
-    }
+    // 1. Load the first frame immediately for fast initial paint
+    const firstImg = new Image();
+    firstImg.src = `/frames/ezgif-frame-${padLeft(START_FRAME, 3)}.jpg`;
+    imagesRef.current[START_FRAME] = firstImg;
+
+    // 2. Load the rest sequentially in the background so it doesn't freeze the browser
+    let currentFrameToLoad = START_FRAME + 1;
+    
+    const loadNextBatch = () => {
+      // Load 10 frames at a time to be gentle on the network
+      for (let i = 0; i < 10 && currentFrameToLoad <= FRAME_COUNT; i++) {
+        const img = new Image();
+        // Set decoding to async to prevent main thread blocking
+        img.decoding = 'async';
+        img.src = `/frames/ezgif-frame-${padLeft(currentFrameToLoad, 3)}.jpg`;
+        imagesRef.current[currentFrameToLoad] = img;
+        currentFrameToLoad++;
+      }
+      
+      if (currentFrameToLoad <= FRAME_COUNT) {
+        // Schedule next batch when the browser has idle time
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          (window as any).requestIdleCallback(loadNextBatch);
+        } else {
+          setTimeout(loadNextBatch, 50);
+        }
+      }
+    };
+    
+    // Start background loading after a tiny delay so the rest of the page can finish rendering
+    setTimeout(loadNextBatch, 500);
+    
   }, []);
 
   const [coverStyle, setCoverStyle] = useState({ width: 0, height: 0, left: 0, top: 0 });
